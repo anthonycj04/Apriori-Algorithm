@@ -16,6 +16,20 @@ public class DataSet {
 		this.users = users;
 	}
 
+	public int getTotalNumOfTrajectories(){
+		int totalNumOfTrajectories = 0;
+		for (int i = 0; i < users.size(); i++)
+			totalNumOfTrajectories += users.get(i).getNumOfTrajectories();
+		return totalNumOfTrajectories;
+	}
+
+	public int getTotalNumOfRecords(){
+		int totalNumOfRecords = 0;
+		for (int i = 0; i < users.size(); i++)
+			totalNumOfRecords += users.get(i).getNumOfRecords();
+		return totalNumOfRecords;
+	}
+
 	public Location getLocations(){
 		return locations;
 	}
@@ -34,4 +48,3 @@ public class DataSet {
 		return "{users: " + users +", locations: " + locations + "}";
 	}
 }
-

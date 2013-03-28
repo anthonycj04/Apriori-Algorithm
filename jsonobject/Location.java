@@ -13,6 +13,10 @@ public class Location{
 		locationMap = new HashMap<String, String>();
 	}
 
+	public Map<String, String> getLocationMap(){
+		return locationMap;
+	}
+
 	@JsonAnySetter
 	public void handleUnknown(String key, Object value){
 		// System.out.println("handleUnknown in " + Location.class.toString());
