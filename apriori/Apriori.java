@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Set;
 
 import jsonobject.DataSet;
 
@@ -20,7 +21,59 @@ public class Apriori {
 	}
 
 	public void start(){
+		NonDuplicateArrayList<Integer> list1 = new NonDuplicateArrayList<Integer>();
+		NonDuplicateArrayList<Integer> list2 = new NonDuplicateArrayList<Integer>();
+
+		list1.add(1);
+		list1.add(3);
+		list1.add(5);
+		list1.add(7);
+		list1.add(9);
+
+		list2.add(2);
+		list2.add(7);
+		list2.add(6);
+		list2.add(3);
+		list2.add(8);
+		list2.add(2);
+		list2.remove((Integer)8);
+
+		System.out.println(list1.toString());
+		System.out.println(list2.toString());
+		list1.printHashSet();
+		list2.printHashSet();
+
+		list1.remove((Integer)1);
+		list1.remove((Integer)5);
+		list1.remove((Integer)9);
+
+		list2.remove((Integer)2);
+		list2.remove((Integer)6);
+
+		System.out.println(list1.toString());
+		System.out.println(list2.toString());
+		list1.printHashSet();
+		list2.printHashSet();
+
+		System.out.println(list1.equals(list2));
+
+		System.exit(0);
 		readData();
+	}
+
+	private void addThings(Set<Integer> in){
+		in.add(12);
+	}
+
+	private long calculateCombination(long n, long r){
+		if (n < r)
+			return 0;
+		long result = n;
+		for (int i = 1; i < r; i++)
+			result *= (n - i);
+		for (int i = 1; i <= r; i++)
+			result /= i;
+		return result;
 	}
 
 	private void readData(){
