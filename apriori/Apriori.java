@@ -4,11 +4,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import jsonobject.DataSet;
+import jsonobject.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+/*
+ * Implements the Apriori Algorithm(with Direct Hashing and Pruning)
+ * Reference: 	An Effective Hash_Based Algorithm for Mining Association Rules
+ * 				Jong Soo Park, Ming-Syan Chen, Philip S. Yu
+ */
 
 public class Apriori {
 	public static void main(String[] args){
@@ -17,92 +26,93 @@ public class Apriori {
 	}
 	
 	public Apriori(){
-
 	}
 
 	public void start(){
-		NonDuplicateArrayList<Integer> list1 = new NonDuplicateArrayList<Integer>();
-		NonDuplicateArrayList<Integer> list2 = new NonDuplicateArrayList<Integer>();
+		DataSet dataSet = readData(Config.filename);
+		ArrayList<NonDuplicateArrayList<Integer>> transactions = getTransactions(dataSet);
 
-		list1.add(1);
-		list1.add(3);
-		list1.add(5);
-		list1.add(7);
-		list1.add(9);
+		// System.out.println("# of users: " + dataSet.getUsers().size());
+		// System.out.println("# of trajectories: " + dataSet.getTotalNumOfTrajectories());
+		// System.out.println("# of records: " + dataSet.getTotalNumOfRecords());
+		// System.out.println("# of distinct locations: " + dataSet.getLocations().getLocationMap().size());
+		// System.out.println("# of transactions: " + transactions.size());
 
-		list2.add(2);
-		list2.add(7);
-		list2.add(6);
-		list2.add(3);
-		list2.add(8);
-		list2.add(2);
-		list2.remove((Integer)8);
-
-		System.out.println(list1.toString());
-		System.out.println(list2.toString());
-		list1.printHashSet();
-		list2.printHashSet();
-
-		list1.remove((Integer)1);
-		list1.remove((Integer)5);
-		list1.remove((Integer)9);
-
-		list2.remove((Integer)2);
-		list2.remove((Integer)6);
-
-		System.out.println(list1.toString());
-		System.out.println(list2.toString());
-		list1.printHashSet();
-		list2.printHashSet();
-
-		System.out.println(list1.equals(list2));
-
-		System.exit(0);
-		readData();
+		int[] hashTable = new int[Math.calculateCombination(dataSet.getLocations().getLocationMap().size(), 2)];
+		HashMap<NonDuplicateArrayList<Integer>, Integer> candidates = new HashMap<NonDuplicateArrayList<Integer>, Integer>();
+		for (NonDuplicateArrayList<Integer> transaction: transactions){
+			for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 1)){
+				if (candidates.containsKey(subset))
+					candidates.put(subset, candidates.get(subset) + 1);
+				else
+					candidates.put(subset, 1);
+			}
+			for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 2)){
+				hashTable[Math.hash(subset, hashTable.length)]++;
+			}
+		}
 	}
 
-	private void addThings(Set<Integer> in){
-		in.add(12);
-	}
-
-	private long calculateCombination(long n, long r){
-		if (n < r)
-			return 0;
-		long result = n;
-		for (int i = 1; i < r; i++)
-			result *= (n - i);
-		for (int i = 1; i <= r; i++)
-			result /= i;
-		return result;
-	}
-
-	private void readData(){
-		String filename = "dm2013_dataset_1.dat";
-		// String filename = "dm2013_dataset_sample.dat";
-		// String filename = "dm2013_dataset_2.dat";
-		String line;
-		BufferedReader bufferedReader;
+	// reads a json string from a given file and convert it into a java class
+	private DataSet readData(String filename){
 		if ((new File(filename).exists())){
+			// file exists, start reading data
 			try {
-				bufferedReader = new BufferedReader(new FileReader(filename));
+				String line;
+				BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
 				// while ((line = bufferedReader.readLine()) != null);
 				line = bufferedReader.readLine();
 				bufferedReader.close();
-
 				ObjectMapper mapper = new ObjectMapper();
 				DataSet dataSet = mapper.readValue(line, DataSet.class);
-				// System.out.println(dataSet.toString());
-				System.out.println("# of users: " + dataSet.getUsers().size());
-				System.out.println("# of trajectories: " + dataSet.getTotalNumOfTrajectories());
-				System.out.println("# of records: " + dataSet.getTotalNumOfRecords());
-				System.out.println("# of distinct locations: " + dataSet.getLocations().getLocationMap().size());
+				return dataSet;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
 		}
 		else{
-			System.out.println("not exists");
+			// file doesn't exist
+			System.err.println("file doesn't exist");
+			System.exit(1);
+		}
+		return null;
+	}
+
+	// retrieve the transactions from a given dataset
+	private ArrayList<NonDuplicateArrayList<Integer>> getTransactions(DataSet dataSet){
+		ArrayList<NonDuplicateArrayList<Integer>> transactions = new ArrayList<NonDuplicateArrayList<Integer>>();
+		List<User> users = dataSet.getUsers();
+		// many users
+		for (User user: users){
+			List<List<List<String>>> trajectories = user.getTrajectories();
+			// each user has one or more trajectories
+			for (List<List<String>> trajectory: trajectories){
+				// each trajectory contains one or more records
+				NonDuplicateArrayList<Integer> transaction = new NonDuplicateArrayList<Integer>();
+				for (List<String> record: trajectory)
+					transaction.add(Integer.valueOf(record.get(0)));
+				transactions.add(transaction);
+			}
+		}
+		return transactions;
+	}
+
+	private ArrayList<NonDuplicateArrayList<Integer>> getKSubset(NonDuplicateArrayList<Integer> set, int k){
+		ArrayList<NonDuplicateArrayList<Integer>> subsets = new ArrayList<NonDuplicateArrayList<Integer>>();
+		Integer[] subset = new Integer[k];
+		processLargerSubsets(set, subset, 0, 0, subsets);
+		return subsets;
+	}
+
+	private void processLargerSubsets(NonDuplicateArrayList<Integer> set, Integer[] subset, int subsetSize, int nextIndex, ArrayList<NonDuplicateArrayList<Integer>> subsets){
+		if (subsetSize == subset.length){
+			subsets.add(new NonDuplicateArrayList<Integer>(subset));
+		}
+		else{
+			for (int j = nextIndex; j < set.size(); j++){
+				subset[subsetSize] = set.get(j);
+				processLargerSubsets(set, subset, subsetSize + 1, j + 1, subsets);
+			}
 		}
 	}
 }

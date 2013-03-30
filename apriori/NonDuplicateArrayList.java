@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+/*
+ * An array list that does not allow duplicate elements.
+ * Based on ArrayList and uses HashSet to efficiently check 
+ * whether a newly added item is a duplicate one or not.
+ * Did not finish implementing all the methods, only the ones I needed.
+ */
+
 public class NonDuplicateArrayList<E> extends ArrayList<E>{
 	private static final long serialVersionUID = 1L;
 	private HashSet<E> hashSet;
@@ -21,6 +28,12 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 	public NonDuplicateArrayList(int initialCapacity){
 		super(initialCapacity);
 		hashSet = new HashSet<E>();
+	}
+
+	public NonDuplicateArrayList(E[] array){
+		hashSet = new HashSet<E>();
+		for (E i: array)
+			add(i);
 	}
 
 	@Override
@@ -61,8 +74,22 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 		return hashSet;
 	}
 
-	public boolean equals(NonDuplicateArrayList<E> nonDuplicateArrayList){
-		return hashSet.equals(nonDuplicateArrayList.getHashSet());
+	// public boolean equals(NonDuplicateArrayList<E> nonDuplicateArrayList){
+	// 	return hashSet.equals(nonDuplicateArrayList.getHashSet());
+	// }
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof NonDuplicateArrayList)
+			return hashSet.equals(((NonDuplicateArrayList<E>) o).getHashSet());
+		else
+			return false;
+	}
+
+	@Override
+	public int hashCode(){
+		return hashSet.hashCode();
 	}
 
 	public boolean contains(NonDuplicateArrayList<E> nonDuplicateArrayList){
@@ -74,8 +101,19 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 		return hashSet.contains(o);
 	}
 
+	// maybe there's a better way to do this
 	public void retainAll(NonDuplicateArrayList<E> nonDuplicateArrayList){
-		// NonDuplicateArrayList<E> result = new Non
+		HashSet<E> retainedHashSet = new HashSet<E>(hashSet);
+		retainedHashSet.retainAll(nonDuplicateArrayList.getHashSet());
+		clear();
+		addAll(retainedHashSet);
+		hashSet.addAll(retainedHashSet);
 	}
 
+	// public ArrayList<NonDuplicateArrayList<E>> getKSubSet(int k){
+	// 	ArrayList<NonDuplicateArrayList<E>> result = new ArrayList<NonDuplicateArrayList<E>>();
+	// 	if (k > size())
+	// 		return result;
+
+	// }
 }
