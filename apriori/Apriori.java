@@ -36,13 +36,13 @@ public class Apriori {
 	}
 
 	public void start(){
-		int iteration, numOfFrequentItemSets = 0, numOfFreqItems = 0, remainingItems = 0;
+		int iteration, numOfFrequentItemSets = 0, numOfFreqItems = 0;
 		DataSet dataSet = readData(Config.filename);
 		ArrayList<NonDuplicateArrayList<Integer>> transactions = getTransactions(dataSet);
 		long startTime = System.currentTimeMillis();
 		DecimalFormat df = new DecimalFormat("##.#####");
 		PrintWriter printWriter = null;
-		String outFilename = Config.filename + "_" + df.format(Config.minSup) + ".txt";
+		String outFilename = "results/" + Config.filename + "_" + df.format(Config.minSup) + ".txt";
 
 		try {
 			printWriter = new PrintWriter(new FileOutputStream(outFilename, false), true);
@@ -56,19 +56,14 @@ public class Apriori {
 		HashMap<NonDuplicateArrayList<Integer>, Integer> candidates = new HashMap<NonDuplicateArrayList<Integer>, Integer>();
 		ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet = new ArrayList<NonDuplicateArrayList<Integer>>();
 		for (NonDuplicateArrayList<Integer> transaction: transactions){
-			ArrayList<NonDuplicateArrayList<Integer>> kSubset = getKSubset(transaction, 1);
-			// for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 1)){
-			for (NonDuplicateArrayList<Integer> subset: kSubset){
+			for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 1)){
 				if (candidates.containsKey(subset))
 					candidates.put(subset, candidates.get(subset) + 1);
 				else
 					candidates.put(subset, 1);
 			}
-			kSubset = getKSubset(transaction, 2);
-			// for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 2)){
-			for (NonDuplicateArrayList<Integer> subset: kSubset){
+			for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 2))
 				hashTable[Math.hash(subset, hashTable.length)]++;
-			}
 		}
 		frequentItemSet.clear();
 		for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
@@ -88,11 +83,9 @@ public class Apriori {
 			ArrayList<NonDuplicateArrayList<Integer>> newTransactions = new ArrayList<NonDuplicateArrayList<Integer>>();
 			for (NonDuplicateArrayList<Integer> transaction: transactions){
 				NonDuplicateArrayList<Integer> newTransaction = new NonDuplicateArrayList<Integer>();
-				// System.out.println("counting support in iteration: " + iteration);
 				countSupport(transaction, candidates, iteration, newTransaction);
 				if (newTransaction.size() > iteration){
 					NonDuplicateArrayList<Integer> newnewTransaction = new NonDuplicateArrayList<Integer>();
-					// System.out.println("making hash table in iteration: " + iteration + " with transaction:(" + newTransaction.size() + ") " + newTransaction.toString());
 					makeHashTable(newTransaction, hashTable, iteration, newHashTable, newnewTransaction);
 					if (newnewTransaction.size() > iteration)
 						newTransactions.add(newnewTransaction);
@@ -145,12 +138,12 @@ public class Apriori {
 		printWriter.println();
 		printWriter.println("Running time: " + (double)(endTime - startTime) / 1000);
 		printWriter.println("Number of frequent itemsets: " + numOfFrequentItemSets);
-		printWriter.println("Average items per frequent itemsets: " + df.format(((double) numOfFreqItems / numOfFrequentItemSets)));
-		// System.out.println("# of users: " + dataSet.getUsers().size());
-		// System.out.println("# of trajectories: " + dataSet.getTotalNumOfTrajectories());
-		// System.out.println("# of records: " + dataSet.getTotalNumOfRecords());
-		// System.out.println("# of distinct locations: " + dataSet.getLocations().getLocationMap().size());
-		// System.out.println("# of transactions: " + transactions.size());
+		printWriter.println("Average items per frequent itemsets: " + df.format((double) numOfFreqItems / numOfFrequentItemSets));
+		printWriter.println("---------------------------------------------------------------------------");
+		printWriter.println("# of users: " + dataSet.getUsers().size());
+		printWriter.println("# of trajectories: " + dataSet.getTotalNumOfTrajectories());
+		printWriter.println("# of records: " + dataSet.getTotalNumOfRecords());
+		printWriter.println("# of distinct locations: " + dataSet.getLocations().getLocationMap().size());
 		printWriter.close();
 		System.out.println("Done");
 	}
@@ -172,17 +165,15 @@ public class Apriori {
 		}
 		HashSet<NonDuplicateArrayList<Integer>> toRemoveSet = new HashSet<NonDuplicateArrayList<Integer>>();
 		for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
-			ArrayList<NonDuplicateArrayList<Integer>> kSubset = getKSubset(entry.getKey(), iteration);
-			for (NonDuplicateArrayList<Integer> set: kSubset){
+			for (NonDuplicateArrayList<Integer> set: getKSubset(entry.getKey(), iteration)){
 				if (!frequentItemSet.contains(set)){
 					toRemoveSet.add(set);
 					break;
 				}
 			}
 		}
-		for (NonDuplicateArrayList<Integer> set: toRemoveSet){
+		for (NonDuplicateArrayList<Integer> set: toRemoveSet)
 			candidates.remove(set);
-		}
 	}
 
 	private void generateCandidates(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, 
@@ -196,9 +187,8 @@ public class Apriori {
 				if (tempSet.size() == iteration - 2){
 					tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
 					tempSet.addAll(frequentItemSet.get(j));
-					if (hashTable[Math.hash(tempSet, hashTable.length)] >= Config.minSupCount){
+					if (hashTable[Math.hash(tempSet, hashTable.length)] >= Config.minSupCount)
 						candidates.put(tempSet, 0);
-					}
 				}
 			}
 		}
@@ -209,7 +199,6 @@ public class Apriori {
 								int iteration, 
 								NonDuplicateArrayList<Integer> newTransaction){
 		int[] occurrenceCount = new int[transaction.size()];
-		// for (NonDuplicateArrayList<Integer> candidate: candidates){
 		for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
 			if (transaction.containsAll(entry.getKey())){
 				candidates.put(entry.getKey(), entry.getValue() + 1);
@@ -229,13 +218,9 @@ public class Apriori {
 								int[] newHashTable, 
 								NonDuplicateArrayList<Integer> newnewTransaction){
 		int[] occurrenceCount = new int[newTransaction.size()];
-		ArrayList<NonDuplicateArrayList<Integer>> kSubset = getKSubset(newTransaction, iteration + 1);
-		// for (NonDuplicateArrayList<Integer> subset: getKSubset(newTransaction, iteration + 1)){
-		for (NonDuplicateArrayList<Integer> subset: kSubset){
+		for (NonDuplicateArrayList<Integer> subset: getKSubset(newTransaction, iteration + 1)){
 			boolean flag = true;
-			ArrayList<NonDuplicateArrayList<Integer>> innerKSubset = getKSubset(subset, iteration);
-			// for (NonDuplicateArrayList<Integer> subsubset: getKSubset(subset, iteration)){
-			for (NonDuplicateArrayList<Integer> subsubset: innerKSubset){
+			for (NonDuplicateArrayList<Integer> subsubset: getKSubset(subset, iteration)){
 				if (hashTable[Math.hash(subsubset, hashTable.length)] < Config.minSupCount){
 					flag = false;
 					break;
@@ -251,7 +236,6 @@ public class Apriori {
 			if (occurrenceCount[i] > 0)
 				newnewTransaction.add(newTransaction.get(i));
 		}
-		// System.out.println("out of makeHashTable");
 	}
 
 	// reads a json string from a given file and convert it into a java class
