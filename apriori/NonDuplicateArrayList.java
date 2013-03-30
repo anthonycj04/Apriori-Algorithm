@@ -36,8 +36,6 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 			add(i);
 	}
 
-
-
 	@Override
 	public boolean add(E e){
 		boolean added = hashSet.add(e);
@@ -119,11 +117,4 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 			result[i] = (Integer) get(i);
 		return result;
 	}
-
-	// public ArrayList<NonDuplicateArrayList<E>> getKSubSet(int k){
-	// 	ArrayList<NonDuplicateArrayList<E>> result = new ArrayList<NonDuplicateArrayList<E>>();
-	// 	if (k > size())
-	// 		return result;
-
-	// }
 }
