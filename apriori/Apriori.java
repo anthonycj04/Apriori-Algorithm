@@ -65,7 +65,7 @@ public class Apriori {
 
 		iteration = 2;
 		while (frequentItemSet.size() > 0){
-			generateCandidates(frequentItemSet, hashTable, candidates);
+			generateCandidates(frequentItemSet, hashTable, candidates, iteration);
 			int[] newHashTable = new int[Math.calculateCombination(dataSet.getLocations().getLocationMap().size(), iteration + 1)];
 			ArrayList<NonDuplicateArrayList<Integer>> newTransactions = new ArrayList<NonDuplicateArrayList<Integer>>();
 			for (NonDuplicateArrayList<Integer> transaction: transactions){
@@ -78,21 +78,40 @@ public class Apriori {
 						newTransactions.add(newnewTransaction);
 				}
 			}
+			hashTable = newHashTable;
+			transactions = newTransactions;
 			frequentItemSet.clear();
 			for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
-				if (entry.getValue() > Config.minSupCount)
+				if (entry.getValue() >= Config.minSupCount)
 					frequentItemSet.add(entry.getKey());
 			}
 			printFrequentItemSet(frequentItemSet);
+
+			// System.out.println("minSupCount: " + Config.minSupCount);
+			// System.out.println("transacation size: " + transactions.size());
+			// System.out.println("candidate size: " + candidates.size());
+			// System.out.println("candidate: " + candidates.toString());
 			iteration++;
 		}
 	}
 
 	private void generateCandidates(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, 
 									int[] hashTable, 
-									HashMap<NonDuplicateArrayList<Integer>, Integer> candidates){
+									HashMap<NonDuplicateArrayList<Integer>, Integer> candidates, int iteration){
 		candidates.clear();
-
+		for(int i = 0; i < frequentItemSet.size(); i++){
+			for (int j = i + 1; j < frequentItemSet.size(); j++){
+				NonDuplicateArrayList<Integer> tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+				tempSet.retainAll(frequentItemSet.get(j));
+				if (tempSet.size() == iteration - 2){
+					tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+					tempSet.addAll(frequentItemSet.get(j));
+					if (hashTable[Math.hash(tempSet, hashTable.length)] >= Config.minSupCount){
+					candidates.put(tempSet, 0);
+					}
+				}
+			}
+		}
 	}
 
 	private void countSupport(NonDuplicateArrayList<Integer> transaction, 
@@ -102,7 +121,7 @@ public class Apriori {
 		int[] occurrenceCount = new int[transaction.size()];
 		// for (NonDuplicateArrayList<Integer> candidate: candidates){
 		for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
-			if (transaction.contains(entry.getKey())){
+			if (transaction.containsAll(entry.getKey())){
 				candidates.put(entry.getKey(), entry.getValue() + 1);
 				for (Integer i: entry.getKey())
 					occurrenceCount[transaction.indexOf(i)]++;
@@ -119,8 +138,24 @@ public class Apriori {
 								int iteration, 
 								int[] newHashTable, 
 								NonDuplicateArrayList<Integer> newnewTransaction){
+		int[] occurrenceCount = new int[newTransaction.size()];
 		for (NonDuplicateArrayList<Integer> subset: getKSubset(newTransaction, iteration + 1)){
-
+			boolean flag = true;
+			for (NonDuplicateArrayList<Integer> subsubset: getKSubset(subset, iteration)){
+				if (hashTable[Math.hash(subsubset, hashTable.length)] < Config.minSupCount){
+					flag = false;
+					break;
+				}
+			}
+			if (flag){
+				newHashTable[Math.hash(subset, newHashTable.length)]++;
+				for (Integer i: subset)
+					occurrenceCount[newTransaction.indexOf(i)]++;
+			}
+		}
+		for (int i = 0; i < newTransaction.size(); i++){
+			if (occurrenceCount[i] > 0)
+				newnewTransaction.add(newTransaction.get(i));
 		}
 	}
 

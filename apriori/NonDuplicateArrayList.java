@@ -36,6 +36,8 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 			add(i);
 	}
 
+
+
 	@Override
 	public boolean add(E e){
 		boolean added = hashSet.add(e);
@@ -92,13 +94,8 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 		return hashSet.hashCode();
 	}
 
-	public boolean contains(NonDuplicateArrayList<E> nonDuplicateArrayList){
-		return hashSet.contains(nonDuplicateArrayList.getHashSet());
-	}
-
-	@Override
-	public boolean contains(Object o){
-		return hashSet.contains(o);
+	public boolean containsAll(NonDuplicateArrayList<E> nonDuplicateArrayList){
+		return hashSet.containsAll(nonDuplicateArrayList.getHashSet());
 	}
 
 	// maybe there's a better way to do this
@@ -108,6 +105,12 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 		clear();
 		addAll(retainedHashSet);
 		hashSet.addAll(retainedHashSet);
+	}
+
+	public void addAll(NonDuplicateArrayList<E> nonDuplicateArrayList){
+		for (E e: nonDuplicateArrayList){
+			add(e);
+		}
 	}
 
 	// public ArrayList<NonDuplicateArrayList<E>> getKSubSet(int k){
