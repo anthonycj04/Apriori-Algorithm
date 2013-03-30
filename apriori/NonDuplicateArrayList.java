@@ -113,6 +113,13 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 		}
 	}
 
+	public int[] toIntArray(){
+		int[] result = new int[size()];
+		for (int i = 0; i < size(); i++)
+			result[i] = (Integer) get(i);
+		return result;
+	}
+
 	// public ArrayList<NonDuplicateArrayList<E>> getKSubSet(int k){
 	// 	ArrayList<NonDuplicateArrayList<E>> result = new ArrayList<NonDuplicateArrayList<E>>();
 	// 	if (k > size())

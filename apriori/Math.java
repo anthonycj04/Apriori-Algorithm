@@ -22,4 +22,18 @@ public class Math {
 			sum += i;
 		return sum % hashTableSize;
 	}
+
+	public static long binomial(int n, int k){
+		if (k < 0 || k > n)
+			return 0;
+		if (k > n - k){
+			k = n - k;
+		}
+		long c = 1;
+		for (int i = 1; i < k + 1; i++){
+			c *= (n - (k - i));
+			c /= i;
+		}
+		return c;
+	}
 }
