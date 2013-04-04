@@ -78,10 +78,12 @@ public class NonDuplicateArrayList<E> extends ArrayList<E>{
 	// 	return hashSet.equals(nonDuplicateArrayList.getHashSet());
 	// }
 
-	@SuppressWarnings("unchecked")
+	// @SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object o){
-		if (o instanceof NonDuplicateArrayList)
+		if (o == null)
+			return false;
+		else if (o instanceof NonDuplicateArrayList)
 			return hashSet.equals(((NonDuplicateArrayList<E>) o).getHashSet());
 		else
 			return false;

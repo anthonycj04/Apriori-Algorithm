@@ -16,11 +16,15 @@ public class Math {
 			return (int) result;
 	}
 
-	public static int hash(NonDuplicateArrayList<Integer> nonDuplicateArrayList, int hashTableSize){
-		int sum = 0;
-		for (Integer i: nonDuplicateArrayList)
-			sum += i;
-		return sum % hashTableSize;
+	// public static int hash(NonDuplicateArrayList<Integer> nonDuplicateArrayList, int hashTableSize){
+	// 	int sum = 0;
+	// 	for (Integer i: nonDuplicateArrayList)
+	// 		sum += i;
+	// 	return sum % hashTableSize;
+	// }
+
+	public static int hash(NonDuplicateArrayList<?> nonDuplicateArrayList, int hashTableSize){
+		return java.lang.Math.abs(nonDuplicateArrayList.hashCode() % hashTableSize);
 	}
 
 	public static long binomial(int n, int k){

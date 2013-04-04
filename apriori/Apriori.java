@@ -38,7 +38,8 @@ public class Apriori {
 	public void start(){
 		int iteration, numOfFrequentItemSets = 0, numOfFreqItems = 0;
 		DataSet dataSet = readData(Config.filename);
-		ArrayList<NonDuplicateArrayList<Integer>> transactions = getTransactions(dataSet);
+		// ArrayList<NonDuplicateArrayList<Integer>> transactions = getTransactions(dataSet);
+		ArrayList<NonDuplicateArrayList<String>> transactions = getTransactions(dataSet);
 		long startTime = System.currentTimeMillis();
 		DecimalFormat df = new DecimalFormat("##.#####");
 		PrintWriter printWriter = null;
@@ -53,20 +54,26 @@ public class Apriori {
 		// the first pass
 		Config.minSupCount = (int) java.lang.Math.ceil(transactions.size() * Config.minSup);
 		int[] hashTable = new int[Math.calculateCombination(dataSet.getLocations().getLocationMap().size(), 2)];
-		HashMap<NonDuplicateArrayList<Integer>, Integer> candidates = new HashMap<NonDuplicateArrayList<Integer>, Integer>();
-		ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet = new ArrayList<NonDuplicateArrayList<Integer>>();
-		for (NonDuplicateArrayList<Integer> transaction: transactions){
-			for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 1)){
+		// HashMap<NonDuplicateArrayList<Integer>, Integer> candidates = new HashMap<NonDuplicateArrayList<Integer>, Integer>();
+		HashMap<NonDuplicateArrayList<String>, Integer> candidates = new HashMap<NonDuplicateArrayList<String>, Integer>();
+		// ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet = new ArrayList<NonDuplicateArrayList<Integer>>();
+		ArrayList<NonDuplicateArrayList<String>> frequentItemSet = new ArrayList<NonDuplicateArrayList<String>>();
+		// for (NonDuplicateArrayList<Integer> transaction: transactions){
+		for (NonDuplicateArrayList<String> transaction: transactions){
+			// for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 1)){
+			for (NonDuplicateArrayList<String> subset: getKSubset(transaction, 1)){
 				if (candidates.containsKey(subset))
 					candidates.put(subset, candidates.get(subset) + 1);
 				else
 					candidates.put(subset, 1);
 			}
-			for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 2))
+			// for (NonDuplicateArrayList<Integer> subset: getKSubset(transaction, 2))
+			for (NonDuplicateArrayList<String> subset: getKSubset(transaction, 2))
 				hashTable[Math.hash(subset, hashTable.length)]++;
 		}
 		frequentItemSet.clear();
-		for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+		// for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+		for (Entry<NonDuplicateArrayList<String>, Integer> entry: candidates.entrySet()){
 			if (entry.getValue() >= Config.minSupCount)
 				frequentItemSet.add(entry.getKey());
 		}
@@ -80,12 +87,16 @@ public class Apriori {
 			System.out.println("generating candidates in iteration: " + iteration);
 			generateCandidates(frequentItemSet, hashTable, candidates, iteration);
 			int[] newHashTable = new int[Math.calculateCombination(dataSet.getLocations().getLocationMap().size(), iteration + 1)];
-			ArrayList<NonDuplicateArrayList<Integer>> newTransactions = new ArrayList<NonDuplicateArrayList<Integer>>();
-			for (NonDuplicateArrayList<Integer> transaction: transactions){
-				NonDuplicateArrayList<Integer> newTransaction = new NonDuplicateArrayList<Integer>();
+			// ArrayList<NonDuplicateArrayList<Integer>> newTransactions = new ArrayList<NonDuplicateArrayList<Integer>>();
+			ArrayList<NonDuplicateArrayList<String>> newTransactions = new ArrayList<NonDuplicateArrayList<String>>();
+			// for (NonDuplicateArrayList<Integer> transaction: transactions){
+			for (NonDuplicateArrayList<String> transaction: transactions){
+				// NonDuplicateArrayList<Integer> newTransaction = new NonDuplicateArrayList<Integer>();
+				NonDuplicateArrayList<String> newTransaction = new NonDuplicateArrayList<String>();
 				countSupport(transaction, candidates, iteration, newTransaction);
 				if (newTransaction.size() > iteration){
-					NonDuplicateArrayList<Integer> newnewTransaction = new NonDuplicateArrayList<Integer>();
+					// NonDuplicateArrayList<Integer> newnewTransaction = new NonDuplicateArrayList<Integer>();
+					NonDuplicateArrayList<String> newnewTransaction = new NonDuplicateArrayList<String>();
 					makeHashTable(newTransaction, hashTable, iteration, newHashTable, newnewTransaction);
 					if (newnewTransaction.size() > iteration)
 						newTransactions.add(newnewTransaction);
@@ -95,7 +106,8 @@ public class Apriori {
 			transactions = newTransactions;
 			frequentItemSet.clear();
 			System.out.println("generating frequent itemsets in iteration: " + iteration);
-			for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+			// for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+			for (Entry<NonDuplicateArrayList<String>, Integer> entry: candidates.entrySet()){
 				if (entry.getValue() >= Config.minSupCount)
 					frequentItemSet.add(entry.getKey());
 			}
@@ -108,16 +120,20 @@ public class Apriori {
 		// original Apriori
 		generateCandidates(frequentItemSet, hashTable, candidates, iteration);
 		while (frequentItemSet.size() > 0){
-			ArrayList<NonDuplicateArrayList<Integer>> newTransactions = new ArrayList<NonDuplicateArrayList<Integer>>();
-			for (NonDuplicateArrayList<Integer> transaction: transactions){
-				NonDuplicateArrayList<Integer> newTransaction = new NonDuplicateArrayList<Integer>();
+			// ArrayList<NonDuplicateArrayList<Integer>> newTransactions = new ArrayList<NonDuplicateArrayList<Integer>>();
+			ArrayList<NonDuplicateArrayList<String>> newTransactions = new ArrayList<NonDuplicateArrayList<String>>();
+			// for (NonDuplicateArrayList<Integer> transaction: transactions){
+			for (NonDuplicateArrayList<String> transaction: transactions){
+				// NonDuplicateArrayList<Integer> newTransaction = new NonDuplicateArrayList<Integer>();
+				NonDuplicateArrayList<String> newTransaction = new NonDuplicateArrayList<String>();
 				countSupport(transaction, candidates, iteration, newTransaction);
 				if (newTransaction.size() > iteration)
 					newTransactions.add(newTransaction);
 			}
 			frequentItemSet.clear();
 			System.out.println("generating frequent itemsets in iteration: " + iteration);
-			for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+			// for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+			for (Entry<NonDuplicateArrayList<String>, Integer> entry: candidates.entrySet()){
 				if (entry.getValue() >= Config.minSupCount)
 					frequentItemSet.add(entry.getKey());
 			}
@@ -148,44 +164,58 @@ public class Apriori {
 		System.out.println("Done");
 	}
 
-	private void aprioriGen(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, 
-							HashMap<NonDuplicateArrayList<Integer>, Integer> candidates,
+	// private void aprioriGen(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, 
+	// 						HashMap<NonDuplicateArrayList<Integer>, Integer> candidates,
+	// 						int iteration){
+	private void aprioriGen(ArrayList<NonDuplicateArrayList<String>> frequentItemSet, 
+							HashMap<NonDuplicateArrayList<String>, Integer> candidates,
 							int iteration){
 		candidates.clear();
 		for (int i = 0; i < frequentItemSet.size(); i++){
 			for (int j = i + 1; j < frequentItemSet.size(); j++){
-				NonDuplicateArrayList<Integer> tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+				// NonDuplicateArrayList<Integer> tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+				NonDuplicateArrayList<String> tempSet = new NonDuplicateArrayList<String>(frequentItemSet.get(i));
 				tempSet.retainAll(frequentItemSet.get(j));
 				if (tempSet.size() == iteration - 1){
-					tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+					// tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+					tempSet = new NonDuplicateArrayList<String>(frequentItemSet.get(i));
 					tempSet.addAll(frequentItemSet.get(j));
 					candidates.put(tempSet, 0);
 				}
 			}
 		}
-		HashSet<NonDuplicateArrayList<Integer>> toRemoveSet = new HashSet<NonDuplicateArrayList<Integer>>();
-		for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
-			for (NonDuplicateArrayList<Integer> set: getKSubset(entry.getKey(), iteration)){
+		// HashSet<NonDuplicateArrayList<Integer>> toRemoveSet = new HashSet<NonDuplicateArrayList<Integer>>();
+		HashSet<NonDuplicateArrayList<String>> toRemoveSet = new HashSet<NonDuplicateArrayList<String>>();
+		// for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+		for (Entry<NonDuplicateArrayList<String>, Integer> entry: candidates.entrySet()){
+			// for (NonDuplicateArrayList<Integer> set: getKSubset(entry.getKey(), iteration)){
+			for (NonDuplicateArrayList<String> set: getKSubset(entry.getKey(), iteration)){
 				if (!frequentItemSet.contains(set)){
 					toRemoveSet.add(set);
 					break;
 				}
 			}
 		}
-		for (NonDuplicateArrayList<Integer> set: toRemoveSet)
+		// for (NonDuplicateArrayList<Integer> set: toRemoveSet)
+		for (NonDuplicateArrayList<String> set: toRemoveSet)
 			candidates.remove(set);
 	}
 
-	private void generateCandidates(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, 
+	// private void generateCandidates(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, 
+	// 								int[] hashTable, 
+	// 								HashMap<NonDuplicateArrayList<Integer>, Integer> candidates, int iteration){
+	private void generateCandidates(ArrayList<NonDuplicateArrayList<String>> frequentItemSet, 
 									int[] hashTable, 
-									HashMap<NonDuplicateArrayList<Integer>, Integer> candidates, int iteration){
+									HashMap<NonDuplicateArrayList<String>, Integer> candidates, int iteration){
 		candidates.clear();
 		for(int i = 0; i < frequentItemSet.size(); i++){
 			for (int j = i + 1; j < frequentItemSet.size(); j++){
-				NonDuplicateArrayList<Integer> tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+				// NonDuplicateArrayList<Integer> tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+				NonDuplicateArrayList<String> tempSet = new NonDuplicateArrayList<String>(frequentItemSet.get(i));
 				tempSet.retainAll(frequentItemSet.get(j));
 				if (tempSet.size() == iteration - 2){
-					tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+					// tempSet = new NonDuplicateArrayList<Integer>(frequentItemSet.get(i));
+					tempSet = new NonDuplicateArrayList<String>(frequentItemSet.get(i));
 					tempSet.addAll(frequentItemSet.get(j));
 					if (hashTable[Math.hash(tempSet, hashTable.length)] >= Config.minSupCount)
 						candidates.put(tempSet, 0);
@@ -194,15 +224,21 @@ public class Apriori {
 		}
 	}
 
-	private void countSupport(NonDuplicateArrayList<Integer> transaction, 
-								HashMap<NonDuplicateArrayList<Integer>, Integer> candidates, 
+	// private void countSupport(NonDuplicateArrayList<Integer> transaction, 
+	// 							HashMap<NonDuplicateArrayList<Integer>, Integer> candidates, 
+	// 							int iteration, 
+	// 							NonDuplicateArrayList<Integer> newTransaction){
+	private void countSupport(NonDuplicateArrayList<String> transaction, 
+								HashMap<NonDuplicateArrayList<String>, Integer> candidates, 
 								int iteration, 
-								NonDuplicateArrayList<Integer> newTransaction){
+								NonDuplicateArrayList<String> newTransaction){
 		int[] occurrenceCount = new int[transaction.size()];
-		for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+		// for (Entry<NonDuplicateArrayList<Integer>, Integer> entry: candidates.entrySet()){
+		for (Entry<NonDuplicateArrayList<String>, Integer> entry: candidates.entrySet()){
 			if (transaction.containsAll(entry.getKey())){
 				candidates.put(entry.getKey(), entry.getValue() + 1);
-				for (Integer i: entry.getKey())
+				// for (Integer i: entry.getKey())
+				for (String i: entry.getKey())
 					occurrenceCount[transaction.indexOf(i)]++;
 			}
 		}
@@ -212,15 +248,22 @@ public class Apriori {
 		}
 	}
 
-	private void makeHashTable(NonDuplicateArrayList<Integer> newTransaction, 
+	// private void makeHashTable(NonDuplicateArrayList<Integer> newTransaction, 
+	// 							int[] hashTable, 
+	// 							int iteration, 
+	// 							int[] newHashTable, 
+	// 							NonDuplicateArrayList<Integer> newnewTransaction){
+	private void makeHashTable(NonDuplicateArrayList<String> newTransaction, 
 								int[] hashTable, 
 								int iteration, 
 								int[] newHashTable, 
-								NonDuplicateArrayList<Integer> newnewTransaction){
+								NonDuplicateArrayList<String> newnewTransaction){
 		int[] occurrenceCount = new int[newTransaction.size()];
-		for (NonDuplicateArrayList<Integer> subset: getKSubset(newTransaction, iteration + 1)){
+		// for (NonDuplicateArrayList<Integer> subset: getKSubset(newTransaction, iteration + 1)){
+		for (NonDuplicateArrayList<String> subset: getKSubset(newTransaction, iteration + 1)){
 			boolean flag = true;
-			for (NonDuplicateArrayList<Integer> subsubset: getKSubset(subset, iteration)){
+			// for (NonDuplicateArrayList<Integer> subsubset: getKSubset(subset, iteration)){
+			for (NonDuplicateArrayList<String> subsubset: getKSubset(subset, iteration)){
 				if (hashTable[Math.hash(subsubset, hashTable.length)] < Config.minSupCount){
 					flag = false;
 					break;
@@ -228,7 +271,8 @@ public class Apriori {
 			}
 			if (flag){
 				newHashTable[Math.hash(subset, newHashTable.length)]++;
-				for (Integer i: subset)
+				// for (Integer i: subset)
+				for (String i: subset)
 					occurrenceCount[newTransaction.indexOf(i)]++;
 			}
 		}
@@ -264,8 +308,10 @@ public class Apriori {
 	}
 
 	// retrieve the transactions from a given dataset
-	private ArrayList<NonDuplicateArrayList<Integer>> getTransactions(DataSet dataSet){
-		ArrayList<NonDuplicateArrayList<Integer>> transactions = new ArrayList<NonDuplicateArrayList<Integer>>();
+	// private ArrayList<NonDuplicateArrayList<Integer>> getTransactions(DataSet dataSet){
+	private ArrayList<NonDuplicateArrayList<String>> getTransactions(DataSet dataSet){
+		// ArrayList<NonDuplicateArrayList<Integer>> transactions = new ArrayList<NonDuplicateArrayList<Integer>>();
+		ArrayList<NonDuplicateArrayList<String>> transactions = new ArrayList<NonDuplicateArrayList<String>>();
 		List<User> users = dataSet.getUsers();
 		// many users
 		for (User user: users){
@@ -273,16 +319,19 @@ public class Apriori {
 			// each user has one or more trajectories
 			for (List<List<String>> trajectory: trajectories){
 				// each trajectory contains one or more records
-				NonDuplicateArrayList<Integer> transaction = new NonDuplicateArrayList<Integer>();
+				// NonDuplicateArrayList<Integer> transaction = new NonDuplicateArrayList<Integer>();
+				NonDuplicateArrayList<String> transaction = new NonDuplicateArrayList<String>();
 				for (List<String> record: trajectory)
-					transaction.add(Integer.valueOf(record.get(0)));
+					transaction.add(record.get(0));
+					// transaction.add(Integer.valueOf(record.get(0)));
 				transactions.add(transaction);
 			}
 		}
 		return transactions;
 	}
 
-	private ArrayList<NonDuplicateArrayList<Integer>> getKSubset(NonDuplicateArrayList<Integer> set, int k){
+	// private ArrayList<NonDuplicateArrayList<Integer>> getKSubset(NonDuplicateArrayList<Integer> set, int k){
+	private ArrayList<NonDuplicateArrayList<String>> getKSubset(NonDuplicateArrayList<String> set, int k){
 		/*
 		// recursive approach
 		// ref: http://stackoverflow.com/questions/4504974/how-to-iteratively-generate-k-elements-subsets-from-a-set-of-size-n-in-java
@@ -294,9 +343,11 @@ public class Apriori {
 		// iterative approach
 		// ref: http://stackoverflow.com/questions/4504974/how-to-iteratively-generate-k-elements-subsets-from-a-set-of-size-n-in-java
 		int c = (int) Math.binomial(set.size(), k);
-		ArrayList<NonDuplicateArrayList<Integer>> subsets = new ArrayList<NonDuplicateArrayList<Integer>>();
+		// ArrayList<NonDuplicateArrayList<Integer>> subsets = new ArrayList<NonDuplicateArrayList<Integer>>();
+		ArrayList<NonDuplicateArrayList<String>> subsets = new ArrayList<NonDuplicateArrayList<String>>();
 		for (int i = 0; i < c; i++)
-			subsets.add(new NonDuplicateArrayList<Integer>());
+			subsets.add(new NonDuplicateArrayList<String>());
+			// subsets.add(new NonDuplicateArrayList<Integer>());
 		int[] ind = k < 0?null:new int[k];
 		for (int i = 0; i < k; i++)
 			ind[i] = i;
@@ -333,12 +384,16 @@ public class Apriori {
 		}
 	}*/
 
-	private void printFrequentItemSet(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, PrintWriter printWriter){
+	// private void printFrequentItemSet(ArrayList<NonDuplicateArrayList<Integer>> frequentItemSet, PrintWriter printWriter){
+	private void printFrequentItemSet(ArrayList<NonDuplicateArrayList<String>> frequentItemSet, PrintWriter printWriter){
 		ArrayList<String> result = new ArrayList<String>();
-		for (NonDuplicateArrayList<Integer> set: frequentItemSet){
+		// for (NonDuplicateArrayList<Integer> set: frequentItemSet){
+		for (NonDuplicateArrayList<String> set: frequentItemSet){
 			ArrayList<String> tempArray = new ArrayList<String>();
-			for (Integer i: set)
-				tempArray.add(String.valueOf(i));
+			// for (Integer i: set)
+				// tempArray.add(String.valueOf(i));
+			for (String i: set)
+				tempArray.add(i);
 			Collections.sort(tempArray);
 			String tempString = "";
 			for (String string: tempArray)
